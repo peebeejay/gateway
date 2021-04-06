@@ -22,7 +22,11 @@ pub enum ValidationError {
     InvalidPriceSignature,
     InvalidPrice(Reason),
     UnknownNotice,
+<<<<<<< Updated upstream
     InvalidTrxRequest(Reason),
+=======
+    UnknownAccount
+>>>>>>> Stashed changes
 }
 
 pub fn validate_unsigned<T: Config>(
@@ -78,14 +82,29 @@ pub fn validate_unsigned<T: Config>(
 
             match (signer_res, nonce) {
                 (Err(e), _) => Err(ValidationError::InvalidTrxRequest(e)),
-                (Ok(sender), nonce) => Ok(ValidTransaction::with_tag_prefix(
-                    "Gateway::exec_trx_request",
-                )
-                .priority(UNSIGNED_TXS_PRIORITY)
-                .longevity(UNSIGNED_TXS_LONGEVITY)
-                .and_provides((sender, nonce))
-                .propagate(true)
-                .build()),
+                (Ok(sender), nonce) => {
+                    let desired_nonce = Nonces::get(sender).ok_or(ValidationError::UnknownNotice)?;
+
+                if desired_nonce == nonce {
+                        Ok(ValidTransaction::with_tag_prefix(
+                        "Gateway::exec_trx_request",
+                    )
+                    .priority(UNSIGNED_TXS_PRIORITY)
+                    .longevity(UNSIGNED_TXS_LONGEVITY)
+                    .and_provides((sender, nonce))
+                    .propagate(true)
+                    .build()),
+                } else {
+                    Ok(ValidTransaction::with_tag_prefix(
+                        "Gateway::exec_trx_request",
+                    )
+                    .priority(UNSIGNED_TXS_PRIORITY)
+                    .longevity(UNSIGNED_TXS_LONGEVITY)
+                    .and_requires((sender, nonce - 1))
+                    .and_provides((sender, nonce))
+                    .propagate(true)
+                    .build()),
+                }
             }
         }
         Call::publish_signature(chain_id, notice_id, signature) => {
