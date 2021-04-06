@@ -59,12 +59,6 @@ pub fn is_minimally_valid_trx_request<T: Config>(
         .recover_account(&prepend_nonce(&request, nonce)[..])
         .map_err(|_| Reason::SignatureAccountMismatch)?;
 
-    // Nonce check
-    let current_nonce = Nonces::get(sender);
-    require!(
-        nonce == current_nonce,
-        Reason::IncorrectNonce(nonce, current_nonce)
-    );
     Ok(sender)
 }
 
