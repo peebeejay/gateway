@@ -1,6 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 use super::{Module as Cash, *};
+use crate::{
+    chains::{Chain, ChainAsset, ChainSignatureList, Ethereum},
+    notices::{ExtractionNotice, Notice},
+    rates::APR,
+    types::*,
+    types::{AssetInfo, Factor, ValidatorKeys},
+};
 use codec::Encode;
+use codec::EncodeLike;
 use frame_benchmarking::benchmarks;
 pub use frame_support::{assert_err, assert_ok};
 use frame_system::RawOrigin;
