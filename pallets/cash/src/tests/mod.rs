@@ -5,6 +5,7 @@ pub use frame_support::{assert_err, assert_ok, dispatch::DispatchError};
 pub use hex_literal::hex;
 pub use our_std::convert::TryInto;
 pub use our_std::{iter::FromIterator, str::FromStr};
+use secp256k1::SecretKey;
 pub use sp_core::crypto::AccountId32;
 pub use sp_core::offchain::testing;
 
@@ -159,11 +160,12 @@ pub fn initialize_storage() {
 }
 
 pub fn validator_a_sign(data: &[u8]) -> Result<ChainSignature, Reason> {
-    std::env::set_var(
-        "ETH_KEY",
-        "6bc5ea78f041146e38233f5bc29c703c1cec8eaaa2214353ee8adf7fc598f23d",
-    );
-    validator_sign::<Test>(data)
+    let private_key =
+        hex::decode("6bc5ea78f041146e38233f5bc29c703c1cec8eaaa2214353ee8adf7fc598f23d").unwrap();
+    let secret_key = SecretKey::parse_slice(&private_key).unwrap();
+    let signature_raw = gateway_crypto::eth_sign(data, &secret_key, false);
+    let signature = ChainSignature::Eth(signature_raw);
+    Ok(signature)
 }
 
 pub fn a_receive_chain_blocks(blocks: &ChainBlocks) -> Result<(), DispatchError> {
@@ -177,11 +179,12 @@ pub fn a_receive_chain_reorg(reorg: &ChainReorg) -> Result<(), DispatchError> {
 }
 
 pub fn validator_b_sign(data: &[u8]) -> Result<ChainSignature, Reason> {
-    std::env::set_var(
-        "ETH_KEY",
-        "50f05592dc31bfc65a77c4cc80f2764ba8f9a7cce29c94a51fe2d70cb5599374",
-    );
-    validator_sign::<Test>(data)
+    let private_key =
+        hex::decode("50f05592dc31bfc65a77c4cc80f2764ba8f9a7cce29c94a51fe2d70cb5599374").unwrap();
+    let secret_key = SecretKey::parse_slice(&private_key).unwrap();
+    let signature_raw = gateway_crypto::eth_sign(data, &secret_key, false);
+    let signature = ChainSignature::Eth(signature_raw);
+    Ok(signature)
 }
 
 pub fn b_receive_chain_blocks(blocks: &ChainBlocks) -> Result<(), DispatchError> {
