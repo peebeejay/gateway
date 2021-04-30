@@ -158,19 +158,19 @@ fn testnet_genesis(
     last_yield_timestamp: Timestamp,
 ) -> GenesisConfig {
     GenesisConfig {
-        frame_system: Some(SystemConfig {
+        frame_system: SystemConfig {
             // Add Wasm runtime to storage.
             code: wasm_binary_unwrap().to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        pallet_aura: Some(AuraConfig {
+        },
+        pallet_aura: AuraConfig {
             authorities: vec![],
-        }),
-        pallet_grandpa: Some(GrandpaConfig {
+        },
+        pallet_grandpa: GrandpaConfig {
             authorities: vec![],
-        }),
+        },
 
-        pallet_session: Some(SessionConfig {
+        pallet_session: SessionConfig {
             keys: initial_authorities
                 .iter()
                 .map(|x| {
@@ -184,9 +184,9 @@ fn testnet_genesis(
                     )
                 })
                 .collect::<Vec<_>>(),
-        }),
+        },
 
-        pallet_cash: Some(CashConfig {
+        pallet_cash: CashConfig {
             cash_yield,
             last_yield_timestamp,
             assets,
@@ -198,11 +198,11 @@ fn testnet_genesis(
                     eth_address: v.1,
                 })
                 .collect::<Vec<_>>(),
-        }),
+        },
 
-        pallet_oracle: Some(OracleConfig {
+        pallet_oracle: OracleConfig {
             reporters: reporters.try_into().unwrap(),
-        }),
+        },
     }
 }
 
