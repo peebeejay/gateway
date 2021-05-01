@@ -18,6 +18,7 @@ use crate::{
     },
     notices::{Notice, NoticeId, NoticeState},
     portfolio::Portfolio,
+    symbol::CASH,
     types::{
         AssetAmount, AssetBalance, AssetIndex, AssetInfo, Balance, Bips, CashIndex, CashPrincipal,
         CashPrincipalAmount, CodeHash, EncodedNotice, GovernanceResult, InterestRateModel,
@@ -747,6 +748,28 @@ impl<T: Config> Module<T> {
     /// Get the portfolio for the given chain account.
     pub fn get_portfolio(account: ChainAccount) -> Result<Portfolio, Reason> {
         Ok(core::get_portfolio::<T>(account)?)
+    }
+
+    /// Get the active validators, and  sets
+    pub fn get_validator_info() -> Result<(Vec<ValidatorKeys>, Vec<(ChainAccount, String)>), Reason>
+    {
+        let validator_keys: Vec<ValidatorKeys> = Validators::iter().map(|(_, v)| v).collect();
+        let (cash_index, _) = core::get_cash_data::<T>()?;
+
+        let miner_earnings: Vec<(ChainAccount, String)> = MinerCumulative::iter()
+            .map(|(miner_address, miner_principal_amount)| {
+                let miner_principal: CashPrincipal = miner_principal_amount
+                    .try_into()
+                    .unwrap_or(CashPrincipal::from_nominal("0"));
+                let miner_balance = cash_index
+                    .cash_balance(miner_principal)
+                    .unwrap_or(Balance::from_nominal("0", CASH))
+                    .value
+                    .to_string();
+                (miner_address, miner_balance)
+            })
+            .collect();
+        Ok((validator_keys, miner_earnings))
     }
 }
 

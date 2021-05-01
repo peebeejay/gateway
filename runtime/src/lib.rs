@@ -48,7 +48,9 @@ use pallet_cash::{
     portfolio::Portfolio,
     rates::APR,
     reason::Reason,
-    types::{AssetAmount, AssetBalance, AssetInfo, Balance, CashIndex, CashPrincipal},
+    types::{
+        AssetAmount, AssetBalance, AssetInfo, Balance, CashIndex, CashPrincipal, ValidatorKeys,
+    },
 };
 use pallet_oracle::{ticker::Ticker, types::AssetPrice};
 
@@ -579,6 +581,10 @@ impl_runtime_apis! {
 
         fn get_portfolio(account: ChainAccount) -> Result<Portfolio, Reason> {
             Cash::get_portfolio(account)
+        }
+
+        fn get_validator_info() -> Result<(Vec<ValidatorKeys>, Vec<(ChainAccount, String)>), Reason> {
+            Cash::get_validator_info()
         }
     }
 
