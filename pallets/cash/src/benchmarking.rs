@@ -33,25 +33,26 @@ const BOB_ADDRESS_BYTES: [u8; 20] = hex!("59a055a3e566F5d9A9Ea1dA81aB375D5361D7c
 
 const MIN_TX_VALUE: u128 = params::MIN_TX_VALUE.value;
 
+pub const ETH_UNIT: Units = Units::from_ticker_str("ETH", 18);
 pub struct Pallet<T: Config>(Module<T>);
 
 impl<T: Config> OnInitialize<T::BlockNumber> for Pallet<T> {
-    fn on_initialize(n: T::BlockNumber) -> frame_support::weights::Weight {
-        Cash::<T>::on_initialize(n)
-    }
+  fn on_initialize(n: T::BlockNumber) -> frame_support::weights::Weight {
+      Cash::<T>::on_initialize(n)
+  }
 }
 
 // endow token to user, create market, add some dummy data
 fn endow_tkn<T: Config>(
-    holder: [u8; 20],
-    amount: AssetBalance,
-    addr: <Ethereum as Chain>::Address,
+  holder: [u8; 20],
+  amount: AssetBalance,
+  addr: <Ethereum as Chain>::Address,
 ) {
     let asset = ChainAsset::Eth(addr);
     let asset_info = AssetInfo {
-        liquidity_factor: LiquidityFactor::from_nominal("1"),
-        miner_shares: MinerShares::from_nominal("0.02"),
-        ..AssetInfo::minimal(asset, Units::from_ticker_str("TKN", 6))
+      liquidity_factor: LiquidityFactor::from_nominal("1"),
+      miner_shares: MinerShares::from_nominal("0.02"),
+      ..AssetInfo::minimal(asset, Units::from_ticker_str("TKN", 6))
     };
 
     SupportedAssets::insert(&asset, asset_info);
@@ -66,17 +67,82 @@ fn endow_tkn<T: Config>(
 fn init_asset_balance(asset: ChainAsset, account: ChainAccount, balance: AssetBalance) {
     AssetBalances::insert(asset, account, balance);
     if balance >= 0 {
-        TotalSupplyAssets::insert(
-            asset,
-            (TotalSupplyAssets::get(asset) as i128 + balance) as u128,
-        );
+      TotalSupplyAssets::insert(
+          asset,
+          (TotalSupplyAssets::get(asset) as i128 + balance) as u128,
+      );
     } else {
-        TotalBorrowAssets::insert(
-            asset,
-            (TotalBorrowAssets::get(asset) as i128 + balance) as u128,
-        );
+      TotalBorrowAssets::insert(
+          asset,
+          (TotalBorrowAssets::get(asset) as i128 + balance) as u128,
+      );
     }
     AssetsWithNonZeroBalance::insert(account, asset, ());
+}
+
+fn construct_reorg(num_events: u32) -> (ChainReorg, ethereum_client::EthereumBlock){
+  let mut events = vec![];
+      
+  let event = ethereum_client::EthereumEvent::Lock {
+    asset: [238; 20],
+    sender: [3; 20],
+    chain: String::from("ETH"),
+    recipient: [4; 32],
+    amount: Quantity::from_nominal("10", ETH_UNIT).value,
+  };
+
+  for _i in 0..num_events {
+    events.push(event.clone());
+  }
+
+  let reorg_event = ethereum_client::EthereumEvent::Lock {
+    asset: [238; 20],
+    sender: [3; 20],
+    chain: String::from("ETH"),
+    recipient: [4; 32],
+    amount: Quantity::from_nominal("10", ETH_UNIT).value,
+  };
+
+  let real_event = ethereum_client::EthereumEvent::Lock {
+    asset: [238; 20],
+    sender: [3; 20],
+    chain: String::from("ETH"),
+    recipient: [4; 32],
+    amount: Quantity::from_nominal("10", ETH_UNIT).value,
+  };
+
+  let last_hash = [4;32];
+  let chain_id = chains::ChainId::Eth;
+  let last_block = ethereum_client::EthereumBlock {
+    hash: last_hash,
+    parent_hash: [1;32],
+    number: 1,
+    events: vec![],
+  };
+  LastProcessedBlock::insert(chain_id, ChainBlock::Eth(last_block));
+
+  let reorg_block = ethereum_client::EthereumBlock {
+    hash: [1;32],
+    parent_hash: last_hash,
+    number: 2,
+    events: vec![reorg_event],
+  };
+
+  let real_block = ethereum_client::EthereumBlock {
+    hash: [1;32],
+    parent_hash: last_hash,
+    number: 2,
+    events: vec![real_event],
+  };
+
+  let reorg = ChainReorg::Eth {
+    from_hash: last_hash,
+    to_hash: [1;32],
+    reverse_blocks: vec![reorg_block.clone()],
+    forward_blocks: vec![real_block.clone()],
+  };
+
+  (reorg, reorg_block)
 }
 
 benchmarks! {
@@ -116,74 +182,103 @@ benchmarks! {
     let chain_id = ChainId::Eth;
     let notice_id = NoticeId(5, 6);
     let notice = Notice::ExtractionNotice(ExtractionNotice::Eth {
-        id: NoticeId(80, 1),
-        parent: [3u8; 32],
-        asset: [1; 20],
-        amount: 100,
-        account: [2; 20],
+      id: NoticeId(80, 1),
+      parent: [3u8; 32],
+      asset: [1; 20],
+      amount: 100,
+      account: [2; 20],
     });
     let signature = notice.sign_notice().unwrap();
     let eth_signature = match signature {
-        ChainSignature::Eth(a) => a,
-        _ => panic!("absurd"),
+      ChainSignature::Eth(a) => a,
+      _ => panic!("absurd"),
     };
     let notice_state = NoticeState::Pending {
-        signature_pairs: ChainSignatureList::Eth(vec![]),
+      signature_pairs: ChainSignatureList::Eth(vec![]),
     };
     NoticeStates::insert(chain_id, notice_id, notice_state);
     Notices::insert(chain_id, notice_id, notice);
     let substrate_id = AccountId32::new([0u8; 32]);
     let eth_address = <Ethereum as Chain>::signer_address().unwrap();
     Validators::insert(
-        substrate_id.clone(),
-        ValidatorKeys {
-            substrate_id,
-            eth_address,
-        },
+      substrate_id.clone(),
+      ValidatorKeys {
+          substrate_id,
+          eth_address,
+      },
     );
 
     let expected_notice_state = NoticeState::Pending {
-       signature_pairs: ChainSignatureList::Eth(vec![(eth_address, eth_signature)]),
+      signature_pairs: ChainSignatureList::Eth(vec![(eth_address, eth_signature)]),
     };
 
-    }: {
-        assert_eq!(Cash::<T>::publish_signature(RawOrigin::None.into(), chain_id, notice_id, signature), Ok(()));
-    } verify {
-        assert_eq!(
-            NoticeStates::get(chain_id, notice_id),
-            expected_notice_state
-        );
-    }
+  }: {
+    assert_eq!(Cash::<T>::publish_signature(RawOrigin::None.into(), chain_id, notice_id, signature), Ok(()));
+  } verify {
+    assert_eq!(
+        NoticeStates::get(chain_id, notice_id),
+        expected_notice_state
+    );
+  }
 
     set_yield_next {
-        assert_eq!(CashYieldNext::get(), None);
+      assert_eq!(CashYieldNext::get(), None);
     }: {
-        <pallet_timestamp::Now<T>>::put(1u64);
-        assert_eq!(Cash::<T>::set_yield_next(RawOrigin::Root.into(), APR(100).into(), 86400500), Ok(()));
+      <pallet_timestamp::Now<T>>::put(1u64);
+      assert_eq!(Cash::<T>::set_yield_next(RawOrigin::Root.into(), APR(100).into(), 86400500), Ok(()));
     }
 
-    // receive_chain_blocks {
-    //   let substrate_id = AccountId32::new([12u8; 32]);
-    //   let eth_address = <Ethereum as Chain>::signer_address().unwrap();
-    //   Validators::insert(
-    //       substrate_id.clone(),
-    //       ValidatorKeys {
-    //           substrate_id,
-    //           eth_address,
-    //       },
-    //   );
-    //   let dummy_last_block = ethereum_client::EthereumBlock {
-    //     hash: [0;32],
-    //     parent_hash: [0;32],
-    //     number: 1u64,
-    //     events: vec![]
-    //   };
-    //   LastProcessedBlock::insert(ChainId::Eth, dummy_last_block);
-    //   let blocks = ChainBlocks::Eth(vec![]);
-    //   let signature = ChainSignature::Eth(<Ethereum as Chain>::sign_message(&blocks.encode()).unwrap());
-    // }: {
-    //     assert_ok!(Cash::<T>::receive_chain_blocks(RawOrigin::None.into(), blocks, signature));
-    // }
+  receive_chain_blocks {
+    let substrate_id = AccountId32::new([12u8; 32]);
+    let eth_address = <Ethereum as Chain>::signer_address().unwrap();
+    Validators::insert(
+      substrate_id.clone(),
+      ValidatorKeys {
+          substrate_id,
+          eth_address,
+      },
+    );
+    let blocks = ChainBlocks::Eth(vec![]);
+    let signature = ChainSignature::Eth(<Ethereum as Chain>::sign_message(&blocks.encode()).unwrap());
+  }: {
+    assert_ok!(Cash::<T>::receive_chain_blocks(RawOrigin::None.into(), blocks, signature));
+  }
+
+  receive_chain_reorg_pending {
+    let z in 1 .. 10;
+    // add 2 vals
+    let substrate_id = AccountId32::new([12u8; 32]);
+    Validators::insert(
+      substrate_id.clone(),
+      ValidatorKeys {
+          substrate_id,
+          eth_address: BOB_ADDRESS_BYTES,
+      },
+    );
+
+    Validators::insert(
+      AccountId32::new([13u8; 32]),
+      ValidatorKeys {
+          substrate_id: AccountId32::new([13u8; 32]),
+          eth_address: <Ethereum as Chain>::signer_address().unwrap(),
+      },
+    );
+
+    let (reorg, reorg_block) = construct_reorg(z);
+    let reorg_blocks = ChainBlocks::Eth(vec![reorg_block]);
+    let signature = ChainSignature::Eth(<Ethereum as Chain>::sign_message(&reorg_blocks.encode()).unwrap());
+    assert_ok!(Cash::<T>::receive_chain_blocks(RawOrigin::None.into(), reorg_blocks, signature));
+    let reorg_signature = ChainSignature::Eth(<Ethereum as Chain>::sign_message(&reorg.encode()).unwrap());
+  }: {
+    assert_ok!(Cash::<T>::receive_chain_reorg(RawOrigin::None.into(), reorg, reorg_signature));
+  } verify {
+    assert_eq!(PendingChainReorgs::get(ChainId::Eth).len(), 1);
+  }
+
+  // TODO
+  // receive_chain_reorg_applied {
+  // * sign chain reorg w all validators
+  // }
 
   support_asset {
     let info = AssetInfo::minimal(
@@ -245,8 +340,8 @@ benchmarks! {
     let substrate_id: SubstrateId = [2; 32].into();
     let eth_address = [1; 20];
     let val_keys = vec![ValidatorKeys {
-        substrate_id: substrate_id.clone(),
-        eth_address: eth_address.clone(),
+      substrate_id: substrate_id.clone(),
+      eth_address: eth_address.clone(),
     }];
     assert_eq!(
       pallet_session::Module::<T>::set_keys(
@@ -335,24 +430,26 @@ mod tests {
         initialize_storage,
         mock::{new_test_ext, Test},
     };
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            initialize_storage();
-            assert_ok!(test_benchmark_on_initialize::<Test>());
-            // assert_ok!(test_benchmark_receive_chain_blocks::<Test>());
-            assert_ok!(test_benchmark_publish_signature::<Test>());
-            assert_ok!(test_benchmark_set_yield_next::<Test>());
-            assert_ok!(test_benchmark_support_asset::<Test>());
-            assert_ok!(test_benchmark_set_rate_model::<Test>());
-            assert_ok!(test_benchmark_set_liquidity_factor::<Test>());
-            assert_ok!(test_benchmark_set_supply_cap::<Test>());
-            assert_ok!(test_benchmark_allow_next_code_with_hash::<Test>());
-            assert_ok!(test_benchmark_set_next_code_via_hash::<Test>());
-            assert_ok!(test_benchmark_change_validators::<Test>());
-            assert_ok!(test_benchmark_exec_trx_request_extract::<Test>());
-            assert_ok!(test_benchmark_exec_trx_request_transfer::<Test>());
-            assert_ok!(test_benchmark_exec_trx_request_liquidate::<Test>());
-        });
-    }
+
+  #[test]
+  fn test_benchmarks() {
+    new_test_ext().execute_with(|| {
+      initialize_storage();
+      assert_ok!(test_benchmark_on_initialize::<Test>());
+      assert_ok!(test_benchmark_receive_chain_blocks::<Test>());
+      assert_ok!(test_benchmark_receive_chain_reorg_pending::<Test>());
+      assert_ok!(test_benchmark_publish_signature::<Test>());
+      assert_ok!(test_benchmark_set_yield_next::<Test>());
+      assert_ok!(test_benchmark_support_asset::<Test>());
+      assert_ok!(test_benchmark_set_rate_model::<Test>());
+      assert_ok!(test_benchmark_set_liquidity_factor::<Test>());
+      assert_ok!(test_benchmark_set_supply_cap::<Test>());
+      assert_ok!(test_benchmark_allow_next_code_with_hash::<Test>());
+      assert_ok!(test_benchmark_set_next_code_via_hash::<Test>());
+      assert_ok!(test_benchmark_change_validators::<Test>());
+      assert_ok!(test_benchmark_exec_trx_request_extract::<Test>());
+      assert_ok!(test_benchmark_exec_trx_request_transfer::<Test>());
+      assert_ok!(test_benchmark_exec_trx_request_liquidate::<Test>());
+    });
+  }
 }

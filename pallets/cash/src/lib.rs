@@ -79,9 +79,6 @@ pub mod benchmarking;
 #[cfg(test)]
 mod tests;
 
-#[cfg(any(feature = "runtime-benchmarks", test))]
-mod utils;
-
 /// Type for linking sessions to validators.
 #[type_alias]
 pub type SubstrateId = AccountId32;
@@ -506,7 +503,7 @@ fn get_exec_req_weights<T: Config>(request: Vec<u8>) -> frame_support::weights::
 
 fn get_chain_reorg_weights<T: Config>(reorg: &ChainReorg, signature: &ChainSignature) -> Result<frame_support::weights::Weight, Reason> {
     match reorg {
-        ChainReorg::Eth{from_hash, to_hash, forward_blocks, reverse_blocks} => {
+        ChainReorg::Eth{from_hash: _, to_hash: _, forward_blocks, reverse_blocks} => {
             if let Some(prior) = PendingChainReorgs::get(ChainId::Eth).iter_mut().find(|r| r.reorg == *reorg) {
                 let validator = core::recover_validator::<T>(&reorg.encode(), *signature)?;
                 if prior.would_have_enough_support(&prior.support, &validator) {
