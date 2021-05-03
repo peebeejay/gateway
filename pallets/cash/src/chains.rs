@@ -595,7 +595,11 @@ impl ChainReorgTally {
         self.support.insert(validator.substrate_id.clone());
     }
 
-    pub fn would_have_enough_support(&self, validator_set: &SignersSet, validator: &ValidatorKeys) -> bool {
+    pub fn would_have_enough_support(
+        &self,
+        validator_set: &SignersSet,
+        validator: &ValidatorKeys,
+    ) -> bool {
         let mut hypothetical_signers = self.support.clone();
         hypothetical_signers.insert(validator.substrate_id.clone());
         has_super_majority(&hypothetical_signers, validator_set)

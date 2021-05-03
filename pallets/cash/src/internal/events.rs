@@ -551,7 +551,7 @@ mod tests {
                 events: vec![real_event.clone()],
             };
 
-            let latest_hash = [10;32];
+            let latest_hash = [10; 32];
 
             // mine dummy blocks to get past limit
             let blocks_3 = ChainBlocks::Eth(vec![

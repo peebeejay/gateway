@@ -37,22 +37,22 @@ pub const ETH_UNIT: Units = Units::from_ticker_str("ETH", 18);
 pub struct Pallet<T: Config>(Module<T>);
 
 impl<T: Config> OnInitialize<T::BlockNumber> for Pallet<T> {
-  fn on_initialize(n: T::BlockNumber) -> frame_support::weights::Weight {
-      Cash::<T>::on_initialize(n)
-  }
+    fn on_initialize(n: T::BlockNumber) -> frame_support::weights::Weight {
+        Cash::<T>::on_initialize(n)
+    }
 }
 
 // endow token to user, create market, add some dummy data
 fn endow_tkn<T: Config>(
-  holder: [u8; 20],
-  amount: AssetBalance,
-  addr: <Ethereum as Chain>::Address,
+    holder: [u8; 20],
+    amount: AssetBalance,
+    addr: <Ethereum as Chain>::Address,
 ) {
     let asset = ChainAsset::Eth(addr);
     let asset_info = AssetInfo {
-      liquidity_factor: LiquidityFactor::from_nominal("1"),
-      miner_shares: MinerShares::from_nominal("0.02"),
-      ..AssetInfo::minimal(asset, Units::from_ticker_str("TKN", 6))
+        liquidity_factor: LiquidityFactor::from_nominal("1"),
+        miner_shares: MinerShares::from_nominal("0.02"),
+        ..AssetInfo::minimal(asset, Units::from_ticker_str("TKN", 6))
     };
 
     SupportedAssets::insert(&asset, asset_info);
@@ -67,82 +67,66 @@ fn endow_tkn<T: Config>(
 fn init_asset_balance(asset: ChainAsset, account: ChainAccount, balance: AssetBalance) {
     AssetBalances::insert(asset, account, balance);
     if balance >= 0 {
-      TotalSupplyAssets::insert(
-          asset,
-          (TotalSupplyAssets::get(asset) as i128 + balance) as u128,
-      );
+        TotalSupplyAssets::insert(
+            asset,
+            (TotalSupplyAssets::get(asset) as i128 + balance) as u128,
+        );
     } else {
-      TotalBorrowAssets::insert(
-          asset,
-          (TotalBorrowAssets::get(asset) as i128 + balance) as u128,
-      );
+        TotalBorrowAssets::insert(
+            asset,
+            (TotalBorrowAssets::get(asset) as i128 + balance) as u128,
+        );
     }
     AssetsWithNonZeroBalance::insert(account, asset, ());
 }
 
-fn construct_reorg(num_events: u32) -> (ChainReorg, ethereum_client::EthereumBlock){
-  let mut events = vec![];
-      
-  let event = ethereum_client::EthereumEvent::Lock {
-    asset: [238; 20],
-    sender: [3; 20],
-    chain: String::from("ETH"),
-    recipient: [4; 32],
-    amount: Quantity::from_nominal("10", ETH_UNIT).value,
-  };
+fn construct_reorg(num_events: u32) -> (ChainReorg, ethereum_client::EthereumBlock) {
+    let mut events = vec![];
 
-  for _i in 0..num_events {
-    events.push(event.clone());
-  }
+    let event = ethereum_client::EthereumEvent::Lock {
+        asset: [238; 20],
+        sender: [3; 20],
+        chain: String::from("ETH"),
+        recipient: [4; 32],
+        amount: Quantity::from_nominal("10", ETH_UNIT).value,
+    };
 
-  let reorg_event = ethereum_client::EthereumEvent::Lock {
-    asset: [238; 20],
-    sender: [3; 20],
-    chain: String::from("ETH"),
-    recipient: [4; 32],
-    amount: Quantity::from_nominal("10", ETH_UNIT).value,
-  };
+    for _i in 0..num_events {
+        events.push(event.clone());
+    }
 
-  let real_event = ethereum_client::EthereumEvent::Lock {
-    asset: [238; 20],
-    sender: [3; 20],
-    chain: String::from("ETH"),
-    recipient: [4; 32],
-    amount: Quantity::from_nominal("10", ETH_UNIT).value,
-  };
+    let last_hash = [4; 32];
+    let chain_id = chains::ChainId::Eth;
+    let last_block = ethereum_client::EthereumBlock {
+        hash: last_hash,
+        parent_hash: [1; 32],
+        number: 1,
+        events: vec![],
+    };
+    LastProcessedBlock::insert(chain_id, ChainBlock::Eth(last_block));
 
-  let last_hash = [4;32];
-  let chain_id = chains::ChainId::Eth;
-  let last_block = ethereum_client::EthereumBlock {
-    hash: last_hash,
-    parent_hash: [1;32],
-    number: 1,
-    events: vec![],
-  };
-  LastProcessedBlock::insert(chain_id, ChainBlock::Eth(last_block));
+    let reorg_block = ethereum_client::EthereumBlock {
+        hash: [1; 32],
+        parent_hash: last_hash,
+        number: 2,
+        events: events.clone(),
+    };
 
-  let reorg_block = ethereum_client::EthereumBlock {
-    hash: [1;32],
-    parent_hash: last_hash,
-    number: 2,
-    events: vec![reorg_event],
-  };
+    let real_block = ethereum_client::EthereumBlock {
+        hash: [1; 32],
+        parent_hash: last_hash,
+        number: 2,
+        events: events,
+    };
 
-  let real_block = ethereum_client::EthereumBlock {
-    hash: [1;32],
-    parent_hash: last_hash,
-    number: 2,
-    events: vec![real_event],
-  };
+    let reorg = ChainReorg::Eth {
+        from_hash: last_hash,
+        to_hash: [1; 32],
+        reverse_blocks: vec![reorg_block.clone()],
+        forward_blocks: vec![real_block.clone()],
+    };
 
-  let reorg = ChainReorg::Eth {
-    from_hash: last_hash,
-    to_hash: [1;32],
-    reverse_blocks: vec![reorg_block.clone()],
-    forward_blocks: vec![real_block.clone()],
-  };
-
-  (reorg, reorg_block)
+    (reorg, reorg_block)
 }
 
 benchmarks! {
@@ -431,25 +415,25 @@ mod tests {
         mock::{new_test_ext, Test},
     };
 
-  #[test]
-  fn test_benchmarks() {
-    new_test_ext().execute_with(|| {
-      initialize_storage();
-      assert_ok!(test_benchmark_on_initialize::<Test>());
-      assert_ok!(test_benchmark_receive_chain_blocks::<Test>());
-      assert_ok!(test_benchmark_receive_chain_reorg_pending::<Test>());
-      assert_ok!(test_benchmark_publish_signature::<Test>());
-      assert_ok!(test_benchmark_set_yield_next::<Test>());
-      assert_ok!(test_benchmark_support_asset::<Test>());
-      assert_ok!(test_benchmark_set_rate_model::<Test>());
-      assert_ok!(test_benchmark_set_liquidity_factor::<Test>());
-      assert_ok!(test_benchmark_set_supply_cap::<Test>());
-      assert_ok!(test_benchmark_allow_next_code_with_hash::<Test>());
-      assert_ok!(test_benchmark_set_next_code_via_hash::<Test>());
-      assert_ok!(test_benchmark_change_validators::<Test>());
-      assert_ok!(test_benchmark_exec_trx_request_extract::<Test>());
-      assert_ok!(test_benchmark_exec_trx_request_transfer::<Test>());
-      assert_ok!(test_benchmark_exec_trx_request_liquidate::<Test>());
-    });
-  }
+    #[test]
+    fn test_benchmarks() {
+        new_test_ext().execute_with(|| {
+            initialize_storage();
+            assert_ok!(test_benchmark_on_initialize::<Test>());
+            assert_ok!(test_benchmark_receive_chain_blocks::<Test>());
+            assert_ok!(test_benchmark_receive_chain_reorg_pending::<Test>());
+            assert_ok!(test_benchmark_publish_signature::<Test>());
+            assert_ok!(test_benchmark_set_yield_next::<Test>());
+            assert_ok!(test_benchmark_support_asset::<Test>());
+            assert_ok!(test_benchmark_set_rate_model::<Test>());
+            assert_ok!(test_benchmark_set_liquidity_factor::<Test>());
+            assert_ok!(test_benchmark_set_supply_cap::<Test>());
+            assert_ok!(test_benchmark_allow_next_code_with_hash::<Test>());
+            assert_ok!(test_benchmark_set_next_code_via_hash::<Test>());
+            assert_ok!(test_benchmark_change_validators::<Test>());
+            assert_ok!(test_benchmark_exec_trx_request_extract::<Test>());
+            assert_ok!(test_benchmark_exec_trx_request_transfer::<Test>());
+            assert_ok!(test_benchmark_exec_trx_request_liquidate::<Test>());
+        });
+    }
 }
