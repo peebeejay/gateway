@@ -94,6 +94,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
+name = "arrayvec"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a2f58b0bb10c380af2b26e57212856b8c9a59e0925b4c20f4a174a49734eaf7"
+
+[[package]]
 name = "async-trait"
 version = "0.1.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -183,6 +189,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bitvec"
+version = "0.20.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7774144344a4faa177370406a7ff5f1da24303817368584c6206c8303eb07848"
+dependencies = [
+ "funty",
+ "radium 0.6.2",
+ "tap",
+ "wyz",
+]
+
+[[package]]
 name = "blake2-rfc"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -244,6 +262,12 @@ name = "byte-slice-cast"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0a5e3906bcbf133e33c1d4d95afc664ad37fbdb9f6568d8043e7ea8c27d93d3"
+
+[[package]]
+name = "byte-slice-cast"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65c1bf4a04a88c54f589125563643d773f3254b5c38571395e2b591c693bbc81"
 
 [[package]]
 name = "byte-tools"
@@ -604,7 +628,7 @@ dependencies = [
  "hex",
  "lazy_static",
  "our-std",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "serde",
  "serde_json",
  "sp-core",
@@ -694,14 +718,15 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "frame-benchmarking"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.1.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "frame-support",
  "frame-system",
  "linregress",
- "parity-scale-codec",
- "paste",
+ "log",
+ "parity-scale-codec 2.1.1",
+ "paste 1.0.5",
  "sp-api",
  "sp-io",
  "sp-runtime",
@@ -712,10 +737,10 @@ dependencies = [
 
 [[package]]
 name = "frame-metadata"
-version = "12.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "13.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "serde",
  "sp-core",
  "sp-std",
@@ -723,17 +748,17 @@ dependencies = [
 
 [[package]]
 name = "frame-support"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "bitflags",
  "frame-metadata",
  "frame-support-procedural",
- "impl-trait-for-tuples 0.2.1",
+ "impl-trait-for-tuples",
  "log",
  "once_cell",
- "parity-scale-codec",
- "paste",
+ "parity-scale-codec 2.1.1",
+ "paste 1.0.5",
  "serde",
  "smallvec",
  "sp-arithmetic",
@@ -741,6 +766,7 @@ dependencies = [
  "sp-inherents",
  "sp-io",
  "sp-runtime",
+ "sp-staking",
  "sp-state-machine",
  "sp-std",
  "sp-tracing",
@@ -748,8 +774,8 @@ dependencies = [
 
 [[package]]
 name = "frame-support-procedural"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "Inflector",
  "frame-support-procedural-tools",
@@ -760,11 +786,11 @@ dependencies = [
 
 [[package]]
 name = "frame-support-procedural-tools"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "frame-support-procedural-tools-derive",
- "proc-macro-crate",
+ "proc-macro-crate 1.0.0",
  "proc-macro2",
  "quote",
  "syn",
@@ -772,8 +798,8 @@ dependencies = [
 
 [[package]]
 name = "frame-support-procedural-tools-derive"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -782,12 +808,13 @@ dependencies = [
 
 [[package]]
 name = "frame-system"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "frame-support",
- "impl-trait-for-tuples 0.2.1",
- "parity-scale-codec",
+ "impl-trait-for-tuples",
+ "log",
+ "parity-scale-codec 2.1.1",
  "serde",
  "sp-core",
  "sp-io",
@@ -921,7 +948,7 @@ dependencies = [
  "lazy_static",
  "libsecp256k1",
  "our-std",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "rusoto_core",
  "rusoto_kms",
  "sp-core",
@@ -1158,7 +1185,16 @@ version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1be51a921b067b0eaca2fad532d9400041561aa922221cc65f95a85641c6bf53"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 1.3.7",
+]
+
+[[package]]
+name = "impl-codec"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df170efa359aebdd5cb7fe78edcc67107748e4737bdca8a8fb40d15ea7a877ed"
+dependencies = [
+ "parity-scale-codec 2.1.1",
 ]
 
 [[package]]
@@ -1177,17 +1213,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b47ca4d2b6931707a55fce5cf66aff80e2178c8b63bbb4ecb5695cbc870ddf6f"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "impl-trait-for-tuples"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ef5550a42e3740a0e71f909d4c861056a284060af885ae7aa6242820f920d9d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -1410,9 +1435,9 @@ checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
 
 [[package]]
 name = "memory-db"
-version = "0.25.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cbd2a22f201c03cc1706a727842490abfea17b7b53260358239828208daba3c"
+checksum = "814bbecfc0451fc314eeea34f05bbcd5b98a7ad7af37faee088b86a1e633f1d4"
 dependencies = [
  "hash-db",
  "hashbrown",
@@ -1714,6 +1739,7 @@ dependencies = [
 name = "our-std"
 version = "0.0.1"
 dependencies = [
+ "log",
  "our-std-proc-macro",
  "serde",
  "sp-runtime",
@@ -1748,7 +1774,7 @@ dependencies = [
  "pallet-oracle",
  "pallet-session",
  "pallet-timestamp",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "runtime-interfaces",
  "serde",
@@ -1791,7 +1817,7 @@ dependencies = [
  "our-std",
  "pallet-session",
  "pallet-timestamp",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "runtime-interfaces",
  "serde",
@@ -1807,15 +1833,14 @@ dependencies = [
 
 [[package]]
 name = "pallet-session"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "frame-support",
  "frame-system",
- "impl-trait-for-tuples 0.1.3",
+ "impl-trait-for-tuples",
  "pallet-timestamp",
- "parity-scale-codec",
- "serde",
+ "parity-scale-codec 2.1.1",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -1827,15 +1852,15 @@ dependencies = [
 
 [[package]]
 name = "pallet-timestamp"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "impl-trait-for-tuples 0.2.1",
- "parity-scale-codec",
- "serde",
+ "impl-trait-for-tuples",
+ "log",
+ "parity-scale-codec 2.1.1",
  "sp-inherents",
  "sp-runtime",
  "sp-std",
@@ -1850,18 +1875,30 @@ checksum = "a4b26b16c7687c3075982af47719e481815df30bc544f7a6690763a25ca16e9d"
 dependencies = [
  "arrayvec 0.5.2",
  "bitvec 0.17.4",
- "byte-slice-cast",
+ "byte-slice-cast 0.3.5",
+ "serde",
+]
+
+[[package]]
+name = "parity-scale-codec"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0f518afaa5a47d0d6386229b0a6e01e86427291d643aa4cabb4992219f504f8"
+dependencies = [
+ "arrayvec 0.7.0",
+ "bitvec 0.20.4",
+ "byte-slice-cast 1.0.0",
  "parity-scale-codec-derive",
  "serde",
 ]
 
 [[package]]
 name = "parity-scale-codec-derive"
-version = "1.2.3"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c41512944b1faff334a5f1b9447611bf4ef40638ccb6328173dacefb338e878c"
+checksum = "f44c5f94427bd0b5076e8f7e15ca3f60a4d8ac0077e4793884e6fdfd8915344e"
 dependencies = [
- "proc-macro-crate",
+ "proc-macro-crate 0.1.5",
  "proc-macro2",
  "quote",
  "syn",
@@ -1869,16 +1906,16 @@ dependencies = [
 
 [[package]]
 name = "parity-util-mem"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f17f15cb05897127bf36a240085a1f0bbef7bce3024849eccf7f93f6171bc27"
+checksum = "664a8c6b8e62d8f9f2f937e391982eb433ab285b4cd9545b342441e04a906e42"
 dependencies = [
  "cfg-if 1.0.0",
  "hashbrown",
- "impl-trait-for-tuples 0.2.1",
+ "impl-trait-for-tuples",
  "parity-util-mem-derive",
  "parking_lot",
- "primitive-types 0.8.0",
+ "primitive-types 0.9.0",
  "winapi 0.3.9",
 ]
 
@@ -1933,6 +1970,12 @@ dependencies = [
  "paste-impl",
  "proc-macro-hack",
 ]
+
+[[package]]
+name = "paste"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acbf547ad0c65e31259204bd90935776d1c693cec2f4ff7abb7a1bbbd40dfe58"
 
 [[package]]
 name = "paste-impl"
@@ -2045,22 +2088,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dd39dcacf71411ba488570da7bbc89b717225e46478b30ba99b92db6b149809"
 dependencies = [
  "fixed-hash 0.6.1",
- "impl-codec",
+ "impl-codec 0.4.2",
  "impl-rlp",
  "impl-serde",
  "uint 0.8.5",
-]
-
-[[package]]
-name = "primitive-types"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3824ae2c5e27160113b9e029a10ec9e3f0237bad8029f69c7724393c9fdefd8"
-dependencies = [
- "fixed-hash 0.7.0",
- "impl-codec",
- "impl-serde",
- "uint 0.9.0",
 ]
 
 [[package]]
@@ -2070,6 +2101,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2415937401cb030a2a0a4d922483f945fa068f52a7dbb22ce0fe5f2b6f6adace"
 dependencies = [
  "fixed-hash 0.7.0",
+ "impl-codec 0.5.0",
+ "impl-serde",
  "uint 0.9.0",
 ]
 
@@ -2079,6 +2112,16 @@ version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d6ea3c4595b96363c13943497db34af4460fb474a95c43f4446ad341b8c9785"
 dependencies = [
+ "toml",
+]
+
+[[package]]
+name = "proc-macro-crate"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41fdbd1df62156fbc5945f4762632564d7d038153091c3fcf1067f6aef7cff92"
+dependencies = [
+ "thiserror",
  "toml",
 ]
 
@@ -2123,6 +2166,12 @@ name = "radium"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "941ba9d78d8e2f7ce474c015eea4d9c6d25b6a3327f9832ee29a4de27f91bbb8"
+
+[[package]]
+name = "radium"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "643f8f41a8ebc4c5dc4515c82bb8abd397b527fc20fd681b7c011c2aee5d44fb"
 
 [[package]]
 name = "rand"
@@ -2330,7 +2379,7 @@ dependencies = [
  "gateway-crypto",
  "lazy_static",
  "our-std",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-externalities",
  "sp-io",
  "sp-runtime-interface",
@@ -2661,7 +2710,7 @@ dependencies = [
  "approx",
  "num-complex",
  "num-traits",
- "paste",
+ "paste 0.1.18",
 ]
 
 [[package]]
@@ -2689,11 +2738,12 @@ dependencies = [
 
 [[package]]
 name = "sp-api"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "hash-db",
- "parity-scale-codec",
+ "log",
+ "parity-scale-codec 2.1.1",
  "sp-api-proc-macro",
  "sp-core",
  "sp-runtime",
@@ -2705,11 +2755,11 @@ dependencies = [
 
 [[package]]
 name = "sp-api-proc-macro"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "blake2-rfc",
- "proc-macro-crate",
+ "proc-macro-crate 1.0.0",
  "proc-macro2",
  "quote",
  "syn",
@@ -2717,10 +2767,10 @@ dependencies = [
 
 [[package]]
 name = "sp-application-crypto"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "serde",
  "sp-core",
  "sp-io",
@@ -2729,21 +2779,22 @@ dependencies = [
 
 [[package]]
 name = "sp-arithmetic"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "integer-sqrt",
  "num-traits",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "serde",
  "sp-debug-derive",
  "sp-std",
+ "static_assertions",
 ]
 
 [[package]]
 name = "sp-core"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "base58",
  "blake2-rfc",
@@ -2760,16 +2811,16 @@ dependencies = [
  "log",
  "merlin",
  "num-traits",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parity-util-mem",
  "parking_lot",
- "primitive-types 0.8.0",
+ "primitive-types 0.9.0",
  "rand 0.7.3",
  "regex",
  "schnorrkel",
  "secrecy",
  "serde",
- "sha2 0.8.2",
+ "sha2 0.9.3",
  "sp-debug-derive",
  "sp-externalities",
  "sp-runtime-interface",
@@ -2786,8 +2837,8 @@ dependencies = [
 
 [[package]]
 name = "sp-debug-derive"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2796,21 +2847,21 @@ dependencies = [
 
 [[package]]
 name = "sp-externalities"
-version = "0.8.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "0.9.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "environmental",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-std",
  "sp-storage",
 ]
 
 [[package]]
 name = "sp-inherents"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "sp-core",
  "sp-std",
@@ -2819,14 +2870,14 @@ dependencies = [
 
 [[package]]
 name = "sp-io"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "futures",
  "hash-db",
  "libsecp256k1",
  "log",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "sp-core",
  "sp-externalities",
@@ -2843,14 +2894,14 @@ dependencies = [
 
 [[package]]
 name = "sp-keystore"
-version = "0.8.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "0.9.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "async-trait",
  "derive_more",
  "futures",
  "merlin",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "schnorrkel",
  "sp-core",
@@ -2859,24 +2910,24 @@ dependencies = [
 
 [[package]]
 name = "sp-panic-handler"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "backtrace",
 ]
 
 [[package]]
 name = "sp-runtime"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "either",
  "hash256-std-hasher",
- "impl-trait-for-tuples 0.2.1",
+ "impl-trait-for-tuples",
  "log",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parity-util-mem",
- "paste",
+ "paste 1.0.5",
  "rand 0.7.3",
  "serde",
  "sp-application-crypto",
@@ -2888,12 +2939,12 @@ dependencies = [
 
 [[package]]
 name = "sp-runtime-interface"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "impl-trait-for-tuples 0.2.1",
- "parity-scale-codec",
- "primitive-types 0.8.0",
+ "impl-trait-for-tuples",
+ "parity-scale-codec 2.1.1",
+ "primitive-types 0.9.0",
  "sp-externalities",
  "sp-runtime-interface-proc-macro",
  "sp-std",
@@ -2905,11 +2956,11 @@ dependencies = [
 
 [[package]]
 name = "sp-runtime-interface-proc-macro"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "Inflector",
- "proc-macro-crate",
+ "proc-macro-crate 1.0.0",
  "proc-macro2",
  "quote",
  "syn",
@@ -2917,10 +2968,10 @@ dependencies = [
 
 [[package]]
 name = "sp-session"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-api",
  "sp-core",
  "sp-runtime",
@@ -2930,23 +2981,23 @@ dependencies = [
 
 [[package]]
 name = "sp-staking"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-runtime",
  "sp-std",
 ]
 
 [[package]]
 name = "sp-state-machine"
-version = "0.8.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "0.9.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "hash-db",
  "log",
  "num-traits",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "parking_lot",
  "rand 0.7.3",
  "smallvec",
@@ -2962,16 +3013,16 @@ dependencies = [
 
 [[package]]
 name = "sp-std"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 
 [[package]]
 name = "sp-storage"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "impl-serde",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "ref-cast",
  "serde",
  "sp-debug-derive",
@@ -2980,11 +3031,10 @@ dependencies = [
 
 [[package]]
 name = "sp-timestamp"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "impl-trait-for-tuples 0.2.1",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-api",
  "sp-inherents",
  "sp-runtime",
@@ -2994,11 +3044,11 @@ dependencies = [
 
 [[package]]
 name = "sp-tracing"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "log",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-std",
  "tracing",
  "tracing-core",
@@ -3007,12 +3057,12 @@ dependencies = [
 
 [[package]]
 name = "sp-trie"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "hash-db",
  "memory-db",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "sp-core",
  "sp-std",
  "trie-db",
@@ -3021,11 +3071,11 @@ dependencies = [
 
 [[package]]
 name = "sp-version"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
  "impl-serde",
- "parity-scale-codec",
+ "parity-scale-codec 2.1.1",
  "serde",
  "sp-runtime",
  "sp-std",
@@ -3033,11 +3083,11 @@ dependencies = [
 
 [[package]]
 name = "sp-wasm-interface"
-version = "2.0.0"
-source = "git+https://github.com/compound-finance/substrate?branch=master#3bb13fdc5be7b04a179b1b1c7c2032534263241d"
+version = "3.0.0"
+source = "git+https://github.com/compound-finance/substrate?branch=compound#cbb1f1f3695ab548010f11ed286ef4e78a55105d"
 dependencies = [
- "impl-trait-for-tuples 0.2.1",
- "parity-scale-codec",
+ "impl-trait-for-tuples",
+ "parity-scale-codec 2.1.1",
  "sp-std",
  "wasmi",
 ]
