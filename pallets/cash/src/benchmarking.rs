@@ -15,13 +15,6 @@ use frame_system::RawOrigin;
 use sp_core::crypto::AccountId32;
 use sp_std::prelude::*;
 
-use crate::{
-    chains::{Chain, ChainSignatureList, Ethereum},
-    notices::{ExtractionNotice, Notice},
-    rates::APR,
-    types::ValidatorKeys,
-};
-
 benchmarks! {
   publish_signature {
     let chain_id = ChainId::Eth;
