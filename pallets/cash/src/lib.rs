@@ -87,7 +87,7 @@ pub type SubstrateId = AccountId32;
 
 /// Configure the pallet by specifying the parameters and types on which it depends.
 pub trait Config:
-    frame_system::Config
+    frame_system::Config<AccountId=SubstrateId>
     + CreateSignedTransaction<Call<Self>>
     + pallet_timestamp::Config
     + pallet_oracle::Config

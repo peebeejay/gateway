@@ -272,11 +272,15 @@ impl State {
                 match account {
                     ChainAccount::Gate(gate_address) => {
                         if cash_principal > &MIN_PRINCIPAL_GATE {
-                            T::AccountStore::insert(&AccountId32::new(*gate_address), ());
-                        // XXX can fail...
-                        } else {
-                            T::AccountStore::remove(&AccountId32::new(*gate_address));
+                            //T::AccountStore::insert(&AccountId32::new(*gate_address), ());
                             // XXX can fail...
+                            // XXX wrong, will inc repeatedly
+                            frame_system::Pallet::<T>::inc_providers(&AccountId32::new(*gate_address));
+                        } else {
+                            //T::AccountStore::remove(&AccountId32::new(*gate_address));
+                            // XXX can fail...
+                            // XXX wrong, wont undo repeated incs
+                            frame_system::Pallet::<T>::dec_providers(&AccountId32::new(*gate_address));
                         }
                     }
 

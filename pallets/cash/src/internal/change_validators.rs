@@ -60,7 +60,8 @@ mod tests {
             }];
             let session_keys = MockSessionKeys { dummy: 1u64.into() };
             // XXX really set it up using a transfer to validator first
-            assert!(<Test as Config>::AccountStore::insert(&substrate_id, ()).is_ok());
+            //assert!(<Test as Config>::AccountStore::insert(&substrate_id, ()).is_ok());
+            frame_system::Pallet::<Test>::inc_providers(&substrate_id);
             assert_eq!(
                 Ok(()),
                 Session::set_keys(
