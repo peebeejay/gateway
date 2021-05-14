@@ -36,7 +36,8 @@ use frame_support::{
 use frame_system;
 use frame_system::{ensure_none, ensure_root, offchain::CreateSignedTransaction};
 use our_std::{
-    collections::btree_set::BTreeSet, convert::TryInto, error, log, str, vec::Vec, Debuggable,
+    collections::btree_map::BTreeMap, collections::btree_set::BTreeSet, convert::TryInto, error,
+    log, str, vec::Vec, Debuggable,
 };
 use sp_core::crypto::AccountId32;
 use sp_runtime::transaction_validity::{
@@ -693,19 +694,27 @@ impl<T: Config> Module<T> {
     pub fn get_assets() -> Result<Vec<AssetInfo>, Reason> {
         Ok(core::get_assets::<T>()?)
     }
+
     /// Get the rates for the given asset.
     pub fn get_accounts() -> Result<Vec<ChainAccount>, Reason> {
         Ok(core::get_accounts::<T>()?)
     }
 
+    /// Get the user counts for the given asset.
+    pub fn get_asset_meta() -> Result<(BTreeMap<String, u32>, BTreeMap<String, u32>, u32, u32), Reason>
+    {
+        Ok(core::get_asset_meta::<T>()?)
+    }
+
+
     /// Get the all liquidity
     pub fn get_accounts_liquidity() -> Result<Vec<(ChainAccount, String)>, Reason> {
-        let accounts: Vec<(ChainAccount, String)> = core::get_accounts_liquidity::<T>()?
-            .iter()
-            .map(|(chain_account, bal)| (chain_account.clone(), format!("{}", bal)))
-            .collect();
-        Ok(accounts)
-    }
+      let accounts: Vec<(ChainAccount, String)> = core::get_accounts_liquidity::<T>()?
+          .iter()
+          .map(|(chain_account, bal)| (chain_account.clone(), format!("{}", bal)))
+          .collect();
+      Ok(accounts)
+  }
 
     /// Get the portfolio for the given chain account.
     pub fn get_portfolio(account: ChainAccount) -> Result<Portfolio, Reason> {

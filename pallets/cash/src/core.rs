@@ -1,6 +1,7 @@
 // Note: The substrate build requires these be re-exported.
 pub use our_std::{
     cmp::{max, min},
+    collections::btree_map::BTreeMap,
     collections::btree_set::BTreeSet,
     convert::{TryFrom, TryInto},
     fmt, result,
@@ -157,6 +158,38 @@ pub fn get_accounts<T: Config>() -> Result<Vec<ChainAccount>, Reason> {
         .map(|p| p.0)
         .collect::<Vec<ChainAccount>>();
     Ok(info)
+}
+
+pub fn get_asset_meta<T: Config>(
+) -> Result<(BTreeMap<String, u32>, BTreeMap<String, u32>, u32, u32), Reason> {
+    let mut asset_suppliers: BTreeMap<String, u32> = BTreeMap::new();
+    let mut asset_borrowers: BTreeMap<String, u32> = BTreeMap::new();
+    let mut aggregate_suppliers_set: BTreeSet<String> = BTreeSet::new();
+
+    let mut aggregate_borrowers_set: BTreeSet<String> = BTreeSet::new();
+
+    for (chain_asset, chain_account, balance) in AssetBalances::iter() {
+        if balance > 0 {
+            let num = asset_suppliers
+                .entry(String::from(chain_asset))
+                .or_insert(0);
+            *num += 1;
+            aggregate_suppliers_set.insert(String::from(chain_account));
+        } else if balance < 0 {
+            let num = asset_borrowers
+                .entry(String::from(chain_asset))
+                .or_insert(0);
+            *num += 1;
+            aggregate_borrowers_set.insert(String::from(chain_account));
+        }
+    };
+
+    Ok((
+        asset_suppliers,
+        asset_borrowers,
+        aggregate_suppliers_set.len() as u32,
+        aggregate_borrowers_set.len() as u32,
+    ))
 }
 
 /// Return the current borrow and supply rates for the asset.

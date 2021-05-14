@@ -11,6 +11,7 @@ use sp_runtime::{generic::BlockId, traits::Block as BlockT};
 
 use pallet_cash::{
     chains::{ChainAccount, ChainAsset},
+    core::BTreeMap,
     portfolio::Portfolio,
     rates::APR,
     reason::Reason,
@@ -42,6 +43,14 @@ pub struct ApiAssetData {
     borrow_rate: String,
     liquidity_factor: String,
     price: String,
+}
+
+#[derive(Deserialize, Serialize, Types)]
+pub struct ApiAssetMeta {
+    supplier_counts: BTreeMap<String, u32>,
+    borrower_counts: BTreeMap<String, u32>,
+    combined_supplier_count: u32,
+    combined_borrower_count: u32,
 }
 
 #[derive(Deserialize, Serialize, Types)]
@@ -109,6 +118,9 @@ pub trait GatewayRpcApi<BlockHash> {
         assets: ChainAsset,
         at: Option<BlockHash>,
     ) -> RpcResult<ApiAssetData>;
+
+    #[rpc(name = "gateway_assetmeta")]
+    fn chain_assets_meta(&self, at: Option<BlockHash>) -> RpcResult<ApiAssetMeta>;
 
     #[rpc(name = "gateway_cashdata")]
     fn gateway_cashdata(
@@ -335,6 +347,22 @@ where
             .map_err(runtime_err)?
             .map_err(chain_err)?;
         Ok(accounts) // XXX try_into?
+    }
+
+    fn chain_assets_meta(&self, at: Option<<B as BlockT>::Hash>) -> RpcResult<ApiAssetMeta> {
+        let api = self.client.runtime_api();
+        let at = BlockId::hash(at.unwrap_or_else(|| self.client.info().best_hash));
+        let (supplier_counts, borrower_counts, combined_suppliers, combined_borrowers) = api
+            .get_asset_meta(&at)
+            .map_err(runtime_err)?
+            .map_err(chain_err)?;
+
+        Ok(ApiAssetMeta {
+            supplier_counts: supplier_counts,
+            borrower_counts: borrower_counts,
+            combined_supplier_count: combined_suppliers,
+            combined_borrower_count: combined_borrowers,
+        })
     }
 
     fn chain_account_liquidities(

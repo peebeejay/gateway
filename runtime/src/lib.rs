@@ -47,6 +47,7 @@ use pallet_cash::{
     chains::{ChainAccount, ChainAsset},
     portfolio::Portfolio,
     rates::APR,
+    core::{BTreeMap},
     reason::Reason,
     types::{AssetAmount, AssetBalance, AssetInfo, Balance, CashIndex, CashPrincipal},
 };
@@ -571,6 +572,10 @@ impl_runtime_apis! {
 
         fn get_accounts() -> Result<Vec<ChainAccount>, Reason> {
             Cash::get_accounts()
+        }
+
+        fn get_asset_meta() -> Result<(BTreeMap<String, u32>, BTreeMap<String, u32>, u32, u32), Reason> {
+          Cash::get_asset_meta()
         }
 
         fn get_accounts_liquidity() -> Result<Vec<(ChainAccount, String)>, Reason> {
