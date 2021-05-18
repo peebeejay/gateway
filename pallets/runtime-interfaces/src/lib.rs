@@ -11,12 +11,16 @@ use std::{str, sync::Mutex};
 pub struct Config {
     pub eth_starport_address: String,
     pub eth_starport_parent_block: EthereumBlock,
+    // XXX todo:wn this should almost certainly not be here.
+    pub matic_starport_address: String,
+    pub matic_starport_parent_block: EthereumBlock,
 }
 
 #[derive(Clone, Debug)]
 pub struct ValidatorConfig {
     pub eth_key_id: String,
     pub eth_rpc_url: String,
+    pub matic_rpc_url: String,
     pub miner: String,
     pub opf_url: String,
 }
@@ -25,16 +29,22 @@ impl Config {
     pub fn update(&mut self, new: Config) {
         self.eth_starport_address = new.eth_starport_address;
         self.eth_starport_parent_block = new.eth_starport_parent_block;
+        self.matic_starport_address = new.matic_starport_address;
+        self.matic_starport_parent_block = new.matic_starport_parent_block;
     }
 }
 
 pub fn new_config(
     eth_starport_address: String,
     eth_starport_parent_block: EthereumBlock,
+    matic_starport_address: String,
+    matic_starport_parent_block: EthereumBlock,
 ) -> Config {
     return Config {
         eth_starport_address,
         eth_starport_parent_block,
+        matic_starport_address,
+        matic_starport_parent_block,
     };
 }
 
@@ -48,7 +58,12 @@ pub const NULL_ETH_BLOCK: EthereumBlock = EthereumBlock {
 };
 
 lazy_static! {
-    static ref CONFIG: Mutex<Config> = Mutex::new(new_config("".into(), NULL_ETH_BLOCK));
+    static ref CONFIG: Mutex<Config> = Mutex::new(new_config(
+        "".into(),
+        NULL_ETH_BLOCK,
+        "".into(),
+        NULL_ETH_BLOCK
+    ));
     static ref VALIDATOR_CONFIG: Mutex<Option<ValidatorConfig>> = Mutex::new(None);
     static ref PRICE_FEED_DATA: Mutex<Option<PriceFeedData>> = Mutex::new(None);
 }
@@ -56,6 +71,7 @@ lazy_static! {
 pub fn initialize_validator_config(
     eth_key_id: Option<String>,
     eth_rpc_url: Option<String>,
+    matic_rpc_url: Option<String>,
     miner: Option<String>,
     opf_url: Option<String>,
 ) {
@@ -64,6 +80,7 @@ pub fn initialize_validator_config(
             *data_ref = Some(ValidatorConfig {
                 eth_key_id: eth_key_id.unwrap_or(ETH_KEY_ID_DEFAULT.to_owned()),
                 eth_rpc_url: eth_rpc_url.unwrap_or(ETH_RPC_URL_DEFAULT.to_owned()),
+                matic_rpc_url: matic_rpc_url.unwrap_or(MATIC_RPC_URL_DEFAULT.to_owned()),
                 miner: miner.unwrap_or(MINER_DEFAULT.to_owned()),
                 opf_url: opf_url.unwrap_or(OPF_URL_DEFAULT.to_owned()),
             });
@@ -110,16 +127,37 @@ pub trait ConfigInterface {
         }
         return NULL_ETH_BLOCK;
     }
+
+    /// Get the Polygon Starport address.
+    fn get_matic_starport_address() -> Option<String> {
+        if let Ok(config) = CONFIG.lock() {
+            // todo: figure out how this gets initialized properly
+            if config.matic_starport_address.len() == 42 {
+                return Some(config.matic_starport_address.clone());
+            }
+        }
+        return None;
+    }
+
+    /// Get the Ethereum Starport parent block.
+    fn get_matic_starport_parent_block() -> EthereumBlock {
+        if let Ok(config) = CONFIG.lock() {
+            return config.matic_starport_parent_block.clone();
+        }
+        return NULL_ETH_BLOCK;
+    }
 }
 
 const ETH_KEY_ID_ENV_VAR: &str = "ETH_KEY_ID";
 const ETH_RPC_URL_ENV_VAR: &str = "ETH_RPC_URL";
+const MATIC_RPC_URL_ENV_VAR: &str = "MATIC_RPC_URL";
 const MINER_ENV_VAR: &str = "MINER";
 const OPF_URL_ENV_VAR: &str = "OPF_URL";
 
 const ETH_KEY_ID_DEFAULT: &str = gateway_crypto::ETH_KEY_ID_ENV_VAR_DEV_DEFAULT;
 const MINER_DEFAULT: &str = "Eth:0x0000000000000000000000000000000000000000";
 const ETH_RPC_URL_DEFAULT: &str = "https://ropsten-eth.compound.finance";
+const MATIC_RPC_URL_DEFAULT: &str = "https://ropsten-eth.compound.finance"; // xxx todo:wn fix this before merge
 const OPF_URL_DEFAULT: &str = "https://prices.compound.finance/coinbase";
 
 /// The ValidatorConfigInterface is designed to be modified as needed by the validators. This means
@@ -167,6 +205,25 @@ pub trait ValidatorConfigInterface {
         if let Ok(config) = VALIDATOR_CONFIG.lock() {
             if let Some(inner) = config.as_ref() {
                 return Some(inner.eth_rpc_url.clone());
+            }
+        }
+        // not set
+        return Some(ETH_RPC_URL_DEFAULT.into());
+    }
+
+    /// Get the Ethereum node RPC URL
+    fn get_matic_rpc_url() -> Option<String> {
+        // check env override
+        if let Ok(rpc_url) = std::env::var(MATIC_RPC_URL_ENV_VAR) {
+            if rpc_url.len() > 0 {
+                return Some(rpc_url);
+            }
+        }
+
+        // check config
+        if let Ok(config) = VALIDATOR_CONFIG.lock() {
+            if let Some(inner) = config.as_ref() {
+                return Some(inner.matic_rpc_url.clone());
             }
         }
         // not set

@@ -227,9 +227,28 @@ pub fn extract_properties(
         events: vec![],
     };
 
+    // XXX todo:wn this should almost definitely not be here :(
+    let matic_starport_address_json = properties.get("matic_starport_address")?;
+    let matic_starport_address = matic_starport_address_json.as_str()?.into();
+
+    let matic_starport_parent_block_json = properties.get("matic_starport_parent_block")?;
+    let matic_spb_hash = matic_starport_parent_block_json.get("hash")?.as_str()?;
+    let matic_spb_parent_hash = matic_starport_parent_block_json
+        .get("parent_hash")?
+        .as_str()?;
+    let matic_spb_number = matic_starport_parent_block_json.get("number")?.as_u64()?;
+    let matic_starport_parent_block = ethereum_client::EthereumBlock {
+        hash: <Ethereum as Chain>::str_to_hash(matic_spb_hash).ok()?,
+        parent_hash: <Ethereum as Chain>::str_to_hash(matic_spb_parent_hash).ok()?,
+        number: matic_spb_number,
+        events: vec![],
+    };
+
     Some(runtime_interfaces::new_config(
         eth_starport_address,
         eth_starport_parent_block,
+        matic_starport_address,
+        matic_starport_parent_block,
     ))
 }
 
