@@ -72,6 +72,7 @@ pub enum Reason {
     TotalBorrowUnderflow,
     InsufficientCollateral,
     NegativeChainCash,
+    StarportParentBlockNotSet,
 }
 
 impl From<Reason> for frame_support::dispatch::DispatchError {
@@ -142,6 +143,7 @@ impl From<Reason> for frame_support::dispatch::DispatchError {
                 (37, 0, "borrower has insufficient collateral to seize")
             }
             Reason::NegativeChainCash => (38, 0, "chain cash underflow"),
+            Reason::StarportParentBlockNotSet => (39, 0, "Starport parent block is not set"),
         };
         frame_support::dispatch::DispatchError::Module {
             index,

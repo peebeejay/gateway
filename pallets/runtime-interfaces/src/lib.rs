@@ -11,9 +11,6 @@ use std::{str, sync::Mutex};
 pub struct Config {
     pub eth_starport_address: String,
     pub eth_starport_parent_block: EthereumBlock,
-    // XXX todo:wn this should almost certainly not be here.
-    pub matic_starport_address: String,
-    pub matic_starport_parent_block: EthereumBlock,
 }
 
 #[derive(Clone, Debug)]
@@ -29,22 +26,16 @@ impl Config {
     pub fn update(&mut self, new: Config) {
         self.eth_starport_address = new.eth_starport_address;
         self.eth_starport_parent_block = new.eth_starport_parent_block;
-        self.matic_starport_address = new.matic_starport_address;
-        self.matic_starport_parent_block = new.matic_starport_parent_block;
     }
 }
 
 pub fn new_config(
     eth_starport_address: String,
     eth_starport_parent_block: EthereumBlock,
-    matic_starport_address: String,
-    matic_starport_parent_block: EthereumBlock,
 ) -> Config {
     return Config {
         eth_starport_address,
         eth_starport_parent_block,
-        matic_starport_address,
-        matic_starport_parent_block,
     };
 }
 
@@ -58,12 +49,7 @@ pub const NULL_ETH_BLOCK: EthereumBlock = EthereumBlock {
 };
 
 lazy_static! {
-    static ref CONFIG: Mutex<Config> = Mutex::new(new_config(
-        "".into(),
-        NULL_ETH_BLOCK,
-        "".into(),
-        NULL_ETH_BLOCK
-    ));
+    static ref CONFIG: Mutex<Config> = Mutex::new(new_config("".into(), NULL_ETH_BLOCK));
     static ref VALIDATOR_CONFIG: Mutex<Option<ValidatorConfig>> = Mutex::new(None);
     static ref PRICE_FEED_DATA: Mutex<Option<PriceFeedData>> = Mutex::new(None);
 }
@@ -124,25 +110,6 @@ pub trait ConfigInterface {
     fn get_eth_starport_parent_block() -> EthereumBlock {
         if let Ok(config) = CONFIG.lock() {
             return config.eth_starport_parent_block.clone();
-        }
-        return NULL_ETH_BLOCK;
-    }
-
-    /// Get the Polygon Starport address.
-    fn get_matic_starport_address() -> Option<String> {
-        if let Ok(config) = CONFIG.lock() {
-            // todo: figure out how this gets initialized properly
-            if config.matic_starport_address.len() == 42 {
-                return Some(config.matic_starport_address.clone());
-            }
-        }
-        return None;
-    }
-
-    /// Get the Ethereum Starport parent block.
-    fn get_matic_starport_parent_block() -> EthereumBlock {
-        if let Ok(config) = CONFIG.lock() {
-            return config.matic_starport_parent_block.clone();
         }
         return NULL_ETH_BLOCK;
     }

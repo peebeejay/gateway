@@ -99,12 +99,12 @@ pub fn track_chain_events<T: Config>() -> Result<(), Reason> {
 pub fn track_chain_events_on<T: Config>(chain_id: ChainId) -> Result<(), Reason> {
     let me = get_current_validator::<T>()?;
     let last_block = get_last_block::<T>(chain_id)?;
-    let true_block = fetch_chain_block(chain_id, last_block.number())?;
+    let true_block = fetch_chain_block::<T>(chain_id, last_block.number())?;
     if last_block.hash() == true_block.hash() {
         let pending_blocks = PendingChainBlocks::get(chain_id);
         let event_queue = get_event_queue::<T>(chain_id)?;
         let slack = queue_slack(&event_queue) as u64;
-        let blocks = fetch_chain_blocks(
+        let blocks = fetch_chain_blocks::<T>(
             chain_id,
             last_block.number() + 1,
             last_block.number() + 1 + slack,
@@ -266,7 +266,7 @@ pub fn formulate_reorg<T: Config>(
             None => Vec::new(),
         };
         let drawrof_blocks_next = match true_block_number {
-            Some(number) => fetch_chain_blocks(
+            Some(number) => fetch_chain_blocks::<T>(
                 true_block.chain_id(),
                 number.saturating_sub(CHUNK as u64),
                 number,

@@ -3,8 +3,10 @@ use crate::reason::Reason;
 use crate::types::{
     AssetAmount, CashIndex, SignersSet, Timestamp, ValidatorIdentity, ValidatorKeys,
 };
+use crate::MaticStarportParentBlock;
 use codec::{Decode, Encode};
 use ethereum_client::{EthereumBlock, EthereumEvent};
+use frame_support::storage::StorageValue;
 use gateway_crypto::public_key_bytes_to_eth_address;
 use our_std::vec::Vec;
 use our_std::{
@@ -84,15 +86,15 @@ impl ChainId {
         }
     }
 
-    pub fn starport_parent_block(self) -> ChainBlock {
+    pub fn starport_parent_block(self) -> Result<ChainBlock, Reason> {
         match self {
-            ChainId::Eth => ChainBlock::Eth(
+            ChainId::Eth => Ok(ChainBlock::Eth(
                 runtime_interfaces::config_interface::get_eth_starport_parent_block(),
-            ),
-            ChainId::Matic => ChainBlock::Matic(
-                runtime_interfaces::config_interface::get_matic_starport_parent_block(),
-            ),
-            ChainId::Reserved | ChainId::Dot => panic!("xxx not supported"),
+            )),
+            ChainId::Matic => Ok(ChainBlock::Matic(
+                MaticStarportParentBlock::get().ok_or(Reason::StarportParentBlockNotSet)?,
+            )),
+            ChainId::Reserved | ChainId::Dot => Err(Reason::StarportParentBlockNotSet),
         }
     }
 

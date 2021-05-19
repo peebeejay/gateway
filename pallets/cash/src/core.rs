@@ -64,7 +64,7 @@ pub fn get_event_queue<T: Config>(chain_id: ChainId) -> Result<ChainBlockEvents,
 pub fn get_last_block<T: Config>(chain_id: ChainId) -> Result<ChainBlock, Reason> {
     match LastProcessedBlock::get(chain_id) {
         Some(block) => Ok(block),
-        None => Ok(chain_id.starport_parent_block()),
+        None => Ok(chain_id.starport_parent_block()?),
     }
 }
 

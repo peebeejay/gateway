@@ -230,6 +230,12 @@ decl_storage! {
 
         /// The mapping of worker tallies for each alternate reorg, relative to current fork of underlying chain.
         PendingChainReorgs get(fn pending_chain_reorgs): map hasher(blake2_128_concat) ChainId => Vec<ChainReorgTally>;
+
+        /// Starport address on Polygon blockchain
+        MaticStarportAddress get(fn matic_starport_address): Option<<chains::Polygon as chains::Chain>::Address>;
+
+        /// The parent block of when the starport was deployed on the matic blockchain
+        MaticStarportParentBlock get(fn matic_starport_parent_block): Option<<chains::Polygon as chains::Chain>::Block>;
     }
 
     add_extra_genesis {
@@ -554,6 +560,20 @@ decl_module! {
         fn set_miner(origin, miner: ChainAccount) {
             ensure_none(origin)?;
             internal::miner::set_miner::<T>(miner);
+        }
+
+        /// Set the starport address on the Polygon/MATIC network
+        #[weight = (<T as Config>::WeightInfo::change_validators(), DispatchClass::Operational, Pays::No)]
+        fn set_matic_starport_address(origin, matic_starport_address: [u8; 20]) {
+            ensure_root(origin)?;
+            MaticStarportAddress::put(matic_starport_address)
+        }
+
+        /// Set the
+        #[weight = (<T as Config>::WeightInfo::change_validators(), DispatchClass::Operational, Pays::No)]
+        fn set_matic_starport_parent_block(origin, matic_starport_parent_block: ethereum_client::EthereumBlock) {
+            ensure_root(origin)?;
+            MaticStarportParentBlock::put(matic_starport_parent_block)
         }
 
         /// Sets the keys for the next set of validators beginning at the next session. [Root]
