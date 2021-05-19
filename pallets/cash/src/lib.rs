@@ -236,6 +236,9 @@ decl_storage! {
 
         /// The parent block of when the starport was deployed on the matic blockchain
         MaticStarportParentBlock get(fn matic_starport_parent_block): Option<<chains::Polygon as chains::Chain>::Block>;
+
+        /// Flag for enabling the Polygon starport
+        IsMaticStarportEnabled get(fn matic_enabled): bool;
     }
 
     add_extra_genesis {
@@ -569,11 +572,18 @@ decl_module! {
             MaticStarportAddress::put(matic_starport_address)
         }
 
-        /// Set the
+        /// Set the Polygon starport parent block
         #[weight = (<T as Config>::WeightInfo::change_validators(), DispatchClass::Operational, Pays::No)]
         fn set_matic_starport_parent_block(origin, matic_starport_parent_block: ethereum_client::EthereumBlock) {
             ensure_root(origin)?;
             MaticStarportParentBlock::put(matic_starport_parent_block)
+        }
+
+        /// Enable the Polygon blockchain
+        #[weight = (<T as Config>::WeightInfo::change_validators(), DispatchClass::Operational, Pays::No)]
+        fn enable_matic_starport(origin) {
+            ensure_root(origin)?;
+            IsMaticStarportEnabled::put(true);
         }
 
         /// Sets the keys for the next set of validators beginning at the next session. [Root]

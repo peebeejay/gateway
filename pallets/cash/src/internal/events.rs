@@ -16,12 +16,13 @@ use crate::{
     reason::Reason,
     require,
     types::{CashPrincipalAmount, Quantity, USDQuantity, USD},
-    Call, Config, Event as EventT, IngressionQueue, LastProcessedBlock, Module, PendingChainBlocks,
-    PendingChainReorgs,
+    Call, Config, Event as EventT, IngressionQueue, IsMaticStarportEnabled, LastProcessedBlock,
+    Module, PendingChainBlocks, PendingChainReorgs,
 };
 use codec::Encode;
 use ethereum_client::EthereumEvent;
 use frame_support::storage::StorageMap;
+use frame_support::storage::StorageValue;
 use frame_system::offchain::SubmitTransaction;
 use our_std::{cmp::max, collections::btree_set::BTreeSet, convert::TryInto};
 use sp_runtime::offchain::{
@@ -84,15 +85,15 @@ pub fn risk_adjusted_value<T: Config>(
 /// Incrementally perform the next step of tracking events from all the underlying chains.
 pub fn track_chain_events<T: Config>() -> Result<(), Reason> {
     let mut lock = StorageLock::<Time>::new(b"cash::track_chain_events");
-    let result = match lock.try_lock() {
-        Ok(_guard) => {
-            // Note: chains could be parallelized
-            track_chain_events_on::<T>(ChainId::Eth)
-        }
+    // note that drop will release the lock at the end of this function
+    lock.try_lock().map_err(|_| Reason::WorkerBusy)?;
+    // Note: chains could be parallelized
+    track_chain_events_on::<T>(ChainId::Eth)?;
+    if IsMaticStarportEnabled::get() {
+        track_chain_events_on::<T>(ChainId::Matic)?;
+    }
 
-        _ => Err(Reason::WorkerBusy),
-    };
-    result
+    Ok(())
 }
 
 /// Perform the next step of tracking events from an underlying chain.
